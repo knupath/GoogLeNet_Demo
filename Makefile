@@ -1,5 +1,8 @@
 .PHONY: all run
 
+make:
+	pip install -r ./requirements.txt
+
 all: ;
 
 run:
