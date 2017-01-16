@@ -7,5 +7,5 @@ all: ;
 
 run:
 	python MLS_Hermosa.py $(KNU_DEVICE) &
-	sleep 60
+	sleep 90
 	python ws_client.py
