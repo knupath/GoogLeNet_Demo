@@ -83,14 +83,15 @@ class MyClientProtocol(WebSocketClientProtocol):
             #self.sendImage()
             print ""
             if not self.image_list:
-                reactor.stop()
+                print "List is Empty"
+                self.sendClose()
             else:
                 self.sendImage()
 
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {0}".format(reason))
         self.file_obj.close()
-        #self.factory.reactor.stop()
+        self.factory.reactor.stop()
 
 
 if __name__ == '__main__':
