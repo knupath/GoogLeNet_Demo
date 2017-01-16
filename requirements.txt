@@ -1,3 +1,4 @@
 spur==0.3.16
 autobahn==0.11.0
 twisted==13.2.0
+flickrapi==2.1.2
