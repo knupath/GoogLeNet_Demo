@@ -296,12 +296,13 @@ class MyServerProtocol(WebSocketServerProtocol):
 
 class MLS:
     def __init__(self, dutHostName_mls, category_obj_mls, db_obj_mls):
+        self.dutHostName = dutHostName_mls
         self.category_obj = category_obj_mls
         self._db_obj = db_obj_mls
         self.running = True
         self.dut = None
         self.Nprobs = 1000
-        self.initialize(dutHostName_mls)
+        self.initialize(self.dutHostName)
 
     def tileImage(self, raw_img):
         """
@@ -518,7 +519,7 @@ class MLS:
 
         self.DEV_ID = 0
         self.dut = RemoteDut(host=dutHostName, devices=1, clusters=32)
-        self.dut.reset()
+        self.dut.reset(self.dutHostName)
         self.dut.localgo()
 
         # send in the fhex file
@@ -633,7 +634,7 @@ class MLS:
 
 
     def __del__(self):
-        self.dut.reset()
+        self.dut.reset(self.dutHostName)
 
 if __name__== '__main__':
     if len(sys.argv) < 2:

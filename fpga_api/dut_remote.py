@@ -4,6 +4,7 @@
 import socket
 import struct
 import time
+import subprocess
 
 import flit_utils as utils
 from Header import Header1K
@@ -26,12 +27,12 @@ class RemoteDut():
 
     #----------------------------------------------------------------------
     def __init__(self, name="DUT", host = 'localhost', base_port=31000, devices = 1, clusters = 1) :
-    
+
         self._name = name
         self._open = False
         self._n_devices = devices
         self._n_clusters = clusters
-        
+
         # We can run fun programs through ssh
         self._shell = spur.SshShell(
                             hostname=host,
@@ -41,9 +42,9 @@ class RemoteDut():
                         )
         self.host = host
         self.port = base_port
-                            
+
         self.flitbridge_handshake()
-        
+
         self._open = True
 
 
@@ -53,8 +54,8 @@ class RemoteDut():
         Destructor
         """
         self.close()
-        
-        
+
+
     #----------------------------------------------------------------------
     def localgo(self):
         """
@@ -91,8 +92,8 @@ class RemoteDut():
                     self.write([[write.encode(), mask]])
             else:
                 raise RuntimeError("No response received from Hermosa %d", device)
-        
-        
+
+
     #----------------------------------------------------------------------
     def flitbridge_handshake(self):
         device_id = 99
@@ -112,20 +113,20 @@ class RemoteDut():
             # self._dut_in_stream._send(struct.pack('>I', 100))
             response = ''
             num_retries = 10
-            
+
             while num_retries:
                 response = self._dut_in_stream._read()
                 if len(response):
                     break
-                    
+
                 time.sleep(0.5)
-                
-               
+
+
             if not len(response):
                 raise RuntimeError("Flitbridge handshake timed out")
-            
+
             response = struct.unpack('I', response)[0]
-                
+
             if response != 0:
                 print "Received non zero response %d" % response
                 if response & 0x2000000:
@@ -151,22 +152,22 @@ class RemoteDut():
                 m=1,
                 addr=0x20001404
             )
-            
+
         for device_id in xrange(self._n_devices):
             h.device_id = device_id
             self.write([[h.encode(), 0xFFFFFFFF]])  # Run all the clusters
 
 
     #----------------------------------------------------------------------
-    def reset(self):
+    def reset(self, sdb):
         """
         Soft resets the fpga device, clearing all fifos and memory.
         """
-        result = self._shell.run(['python', 'soft-reset', '-t', 'localhost'], cwd=r'/usr/local/opt/knux/bin/')
+        result = subprocess.check_call("soft-reset -t " + sdb, shell=True)
+        #result = self._shell.run(['python', 'soft-reset', '-t', 'localhost'], cwd=r'/usr/local/opt/knux/bin/')
         print "soft-reset output:"
-        print result.output
-        
-
+        if result == 0:
+            print "SUCCESS"
 
     #----------------------------------------------------------------------
     def close(self):
@@ -177,15 +178,15 @@ class RemoteDut():
             self._dut_in_stream.close()
             self._open = False
 
-            
+
     #----------------------------------------------------------------------
     def init(self, packets):
         """
         Initializes memory and registers
         """
         self.write(packets)
-        
-        
+
+
     #----------------------------------------------------------------------
     def enable_flit_io(self):
         """
@@ -212,7 +213,7 @@ class RemoteDut():
             raise RuntimeError("device write() Invalid format for packets: %s" % repr(packets))
 
         packets = utils.convert_packets_64_to_32(packets)
-    
+
         # Guy's code doesn't account for extra 32 bits of 0s on odd size
         # packets.  This is a workaround for now until he changes his code,
         # or we change our flit generation code.  I won't put this in the
@@ -223,7 +224,7 @@ class RemoteDut():
                 packets[i] = p[:-1]
 
         self._dut_in_stream.write(packets)
-        
+
         # DEBUG testing loopback
         # Make sure we've connected this port before using.
         # self._dut_loopback_port.write(packets)
@@ -247,17 +248,17 @@ class RemoteDut():
             if len(out):
                 deadline = time.time() + seconds
                 output.extend(out)
-                
+
             if n_flits > 0 and len(output) >= n_flits:
                 print "returning early from listen, {0} flits received".format(len(output))
                 return output
-                
+
             time.sleep(0.05)
 
         print "timing out from listen, {0}/{1} flits received".format(len(output), n_flits)
-        
+
         return output
-    
+
 
     #----------------------------------------------------------------------
     def exec_read_packets(self, packets, progress_callback=None):
@@ -269,7 +270,7 @@ class RemoteDut():
             raise RuntimeError("device write() Invalid format for packets: %s" % repr(packets))
 
         packets = [list(p) for p in packets]
-        
+
         # Add response index to packet.  This will break if we read more
         # than 4 gigawords from Hermosa at a time.
         read_length = 0
@@ -296,7 +297,7 @@ class RemoteDut():
 
             # Check for responses
             responses = self.read()
-            
+
             if len(responses):
                 for packet in responses:
                     response[packet[0]:packet[0]+len(packet)-2] = packet[2:]
@@ -313,4 +314,3 @@ class RemoteDut():
 
         # Flatten response list, remove packet headers
         return response
-
