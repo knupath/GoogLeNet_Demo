@@ -8,8 +8,6 @@ import time
 from os import listdir
 from os.path import isfile, join
 
-#fileName = 'cat_640x360.jpg'
-#fileName = 'cat_256x256.jpg'
 output_file = 'output_results.csv'
 directory_name = 'pictures'
 
@@ -43,7 +41,7 @@ class MyClientProtocol(WebSocketClientProtocol):
         print img.shape
         print img.max()
 
-          # shape should be (Nrows, Ncols, Nchannels)
+        # shape should be (Nrows, Ncols, Nchannels)
         imgBytes = bytearray(img.flatten())
         imgBytes64 = base64.b64encode(imgBytes)
         message = {'image_ID': '0',
@@ -57,7 +55,6 @@ class MyClientProtocol(WebSocketClientProtocol):
 
     def onOpen(self):
         print("WebSocket connection open.")
-
         self.t0 = time.time()
         self.sendImage()
 
@@ -91,7 +88,7 @@ class MyClientProtocol(WebSocketClientProtocol):
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {0}".format(reason))
         self.file_obj.close()
-        self.factory.reactor.stop()
+        self.factory.reactor.callFromThread(reactor.stop)
 
 
 if __name__ == '__main__':

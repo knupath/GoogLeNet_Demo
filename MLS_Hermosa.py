@@ -7,8 +7,6 @@ import time
 import os
 import sqlite3 as lite
 import re
-#from threading import Thread
-#from Queue import Queue
 
 import base64
 import json
@@ -19,8 +17,6 @@ from twisted.python import log
 from twisted.internet import reactor
 
 import scipy.misc
-
-#sys.path.insert(0, '../')
 
 from fpga_api.dut_remote import RemoteDut
 from fpga_api.Header import Header1K
@@ -292,8 +288,6 @@ class MyServerProtocol(WebSocketServerProtocol):
         print("Client connecting: {}".format(request.peer))
 
 
-
-
 class MLS:
     def __init__(self, dutHostName_mls, category_obj_mls, db_obj_mls):
         self.dutHostName = dutHostName_mls
@@ -424,10 +418,7 @@ class MLS:
         response = self.dut.listen(time_ms = 20000, n_flits = Nflits)
         # for resp in response:
         #     print( hex(resp[0]) + ': ' + str(resp[1:]) )
-
-
         if len(response) == Nflits:
-
             for flit in response:                   # loop over flits, not neccasarly in order so get the flit index
                 flit_index = flit[0]
                 payload_size = len(flit) - 2
@@ -452,9 +443,7 @@ class MLS:
             expProbs = np.exp(probs_sub)
             probs = expProbs/expProbs.sum()
             logging.debug('After softmax total probability: ' + str(probs.sum() ) )
-
         return (probs, cycleCount)
-
 
     def classifyFrame(self, input_image):
         """
@@ -469,13 +458,11 @@ class MLS:
         width = input_image.shape[1]
         y0 = max(0, (height-Nx)/2)
         x0 = max(0, (width -Nx)/2)
-
         cropped_center  = input_image[y0:y0+Nx,    x0:x0+Nx,  :]
         if cropped_center.shape[0] != Nx or cropped_center.shape[1] != Nx:
             cropped_center  = scipy.misc.imresize(cropped_center, (Nx, Nx, 3))
 
         tiles = self.tileImage(cropped_center)
-
         self.sendTilesToHermosa(tiles, dev_id)
 
         # for now we are using a single sub-frame
@@ -484,7 +471,6 @@ class MLS:
         # update db with returned results
         self._db_obj.insert_new_record(probs)
 
-
         # sort from highest to lowest probability
         sortedPredictions = np.argsort(-probs)
         matches = []
@@ -492,8 +478,6 @@ class MLS:
         for n in range(3):
              matches.append({'name'  :   self.category_obj.get_truncated_header(sortedPredictions[n]),
                              'value' :   float(probs[sortedPredictions[n]] ) })
-
-
         return (matches, cycleCount)
 
 
@@ -505,18 +489,6 @@ class MLS:
 
         FLIT_FILE1 = 'cnn1.fhex'
         FLIT_FILE2 = 'cnn2.fhex'
-        # flit_output_file = 'cnn.fhex'
-        # FLIT_FILE = flit_output_file
-        #
-        # filenames = ['cnn1.fhex', 'cnn2.fhex']
-        # with open(flit_output_file, 'w') as outfile:
-        #     for fname in filenames:
-        #         with open(fname) as infile:
-        #             for line in infile:
-        #               outfile.write(line)
-
-
-
         self.DEV_ID = 0
         self.dut = RemoteDut(host=dutHostName, devices=1, clusters=32)
         self.dut.reset(self.dutHostName)
@@ -524,7 +496,6 @@ class MLS:
 
         # send in the fhex file
         logging.debug('Reading flit file...')
-        # flitStream = fpga_api.pyh1k.read_hexfile_as_64(FLIT_FILE)
         flitStream1 = fpga_api.pyh1k.read_hexfile_as_64(FLIT_FILE1)
         flitStream2 = fpga_api.pyh1k.read_hexfile_as_64(FLIT_FILE2)
         flitStream = flitStream1 + flitStream2
@@ -554,7 +525,6 @@ class MLS:
             logging.warn("No write confirmation received")
         else:
             logging.debug("Received write confirmation")
-
         self.Nx = 256
         self.channel_mean = np.array([104., 117., 123.]).astype('float32')
 
@@ -568,7 +538,6 @@ class MLS:
         logging.debug('Starting image processing thread')
         frameCount = 0
         #while self.running:
-
        # task = taskQ.get()  #  block until task is ready
         image = task[0]
         image_ID = task[1]
@@ -576,7 +545,6 @@ class MLS:
         frameNum = task[3]
         #logging.debug('Queue size: %d' % taskQ.qsize())
         logging.debug('%d, Processing Frame Number: %d'% (frameCount, frameNum))
-
         (matches, cycleCount) = self.classifyFrame(image)
         # processing time in ms.  Is one cycle exaclty 1 ns?
         proc_time = cycleCount/1.0e6
@@ -584,7 +552,6 @@ class MLS:
         respStr = json.dumps(response)
         logging.debug(respStr)
         webSocket.sendMessage(respStr, False)
-
         frameCount += 1
         #taskQ.task_done()
 
@@ -618,7 +585,6 @@ class MLS:
         #self.imageProcessingThread =  Thread(target=self.processImages)
         #self.imageProcessingThread.setDaemon(True)
         #self.imageProcessingThread.start()
-
         log.startLogging(sys.stdout)
 
         factory = WebSocketServerFactory()
