@@ -1,4 +1,4 @@
-.PHONY: make all run
+.PHONY: all run
 
 make:
 	(\
