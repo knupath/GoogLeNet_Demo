@@ -36,19 +36,20 @@ class MyClientProtocol(WebSocketClientProtocol):
     def processImage(self):
         self.frame_count = 0
         self.fileName = self.image_list.pop()
-        img =  np.asarray(Image.open(join(directory_name, self.fileName)), dtype='uint8')
-        print('Image Loaded: ' + self.fileName)
-        print img.shape
-        print img.max()
+        if not self.fileName.startswith('.'):
+            img =  np.asarray(Image.open(join(directory_name, self.fileName)), dtype='uint8')
+            print('Image Loaded: ' + self.fileName)
+            print img.shape
+            print img.max()
 
-        # shape should be (Nrows, Ncols, Nchannels)
-        imgBytes = bytearray(img.flatten())
-        imgBytes64 = base64.b64encode(imgBytes)
-        message = {'image_ID': '0',
-                   'width': img.shape[1],
-                   'height':img.shape[0],
-                   'data': imgBytes64}
-        self.messageStr = json.dumps(message)
+            # shape should be (Nrows, Ncols, Nchannels)
+            imgBytes = bytearray(img.flatten())
+            imgBytes64 = base64.b64encode(imgBytes)
+            message = {'image_ID': '0',
+                       'width': img.shape[1],
+                       'height':img.shape[0],
+                       'data': imgBytes64}
+            self.messageStr = json.dumps(message)
 
     def onConnect(self, response):
         print("Server connected: {0}".format(response.peer))
