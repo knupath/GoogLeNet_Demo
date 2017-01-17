@@ -81,7 +81,7 @@ class MyClientProtocol(WebSocketClientProtocol):
             #self.sendImage()
             print ""
             if not self.image_list:
-                print "List is Empty"
+                print "End of images list"
                 self.sendClose()
             else:
                 self.sendImage()
@@ -90,6 +90,7 @@ class MyClientProtocol(WebSocketClientProtocol):
         print("WebSocket connection closed: {0}".format(reason))
         self.file_obj.close()
         self.factory.reactor.callFromThread(reactor.stop)
+        #self.factory.reactor.stop()
 
 
 if __name__ == '__main__':

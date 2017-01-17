@@ -9,10 +9,9 @@ all:
 	)
 
 run:
-	echo $(PATH)
-	hard-reset -t $(KNU_DEVICE)
-	hard-release -t $(KNU_DEVICE)
+	sleep 1
+	python flickrdownload.py -o pictures
+	sleep 1
 	python MLS_Hermosa.py $(KNU_DEVICE) &
-	python flickrdownload.py -o pictures &
-	sleep 60
+	sleep 90
 	python ws_client.py
