@@ -15,3 +15,5 @@ run:
 	python MLS_Hermosa.py $(KNU_DEVICE) &
 	sleep 90
 	python ws_client.py
+	sleep 2
+	pkill python
