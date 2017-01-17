@@ -1,11 +1,12 @@
 .PHONY: all run
 
 make:
+
+
+all:
 	(\
 		pip install -r ./requirements.txt;\
 	)
-
-all: ;
 
 run:
 	python MLS_Hermosa.py $(KNU_DEVICE) &
