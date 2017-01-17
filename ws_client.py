@@ -89,8 +89,8 @@ class MyClientProtocol(WebSocketClientProtocol):
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {0}".format(reason))
         self.file_obj.close()
-        self.factory.reactor.callFromThread(reactor.stop)
-        #self.factory.reactor.stop()
+        #self.factory.reactor.callFromThread(reactor.stop)
+        self.factory.reactor.stop()
 
 
 if __name__ == '__main__':
