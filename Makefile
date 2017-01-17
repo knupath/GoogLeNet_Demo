@@ -11,5 +11,5 @@ all:
 run:
 	python MLS_Hermosa.py $(KNU_DEVICE) &
 	python flickrdownload.py -o pictures &
-	sleep 60
+	sleep 80
 	python ws_client.py
