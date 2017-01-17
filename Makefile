@@ -1,4 +1,4 @@
-.PHONY: all run
+.PHONY: make all run
 
 make:
 	pip install -r ./requirements.txt

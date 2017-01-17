@@ -11,8 +11,8 @@ categories (http://image-net.org/challenges/LSVRC/2014/browse-synsets).
 
 ## Operation
 	* Flickr Login:
-	  * Username: support@knupath.com
-		* Password: KNUPATH
+	  * Username: KNUPATH@yahoo.com
+		* Password: KNUP@TH1
 	* Login to the Flickr account above to upload photos (default photos exist)
 		* https://www.flickr.com
 
